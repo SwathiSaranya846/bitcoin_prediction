@@ -18,7 +18,8 @@ setup_database()
 # Read HTML file
 def read_html():
     try:
-        with open('../frontend/index.html', 'r') as f:
+        html_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'index.html'))
+        with open(html_path, 'r') as f:
             return f.read()
     except:
         return "<h1>Frontend not found</h1>"
