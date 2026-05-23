@@ -4,15 +4,15 @@ import mysql.connector
 from mysql.connector import Error
 import pandas as pd
 
-# ====================== CHANGE YOUR MySQL PASSWORD ======================
-DB_PASSWORD = "Swathi@2506"  # Change this!
-# ===========================================================================
+# Use environment variables, fallback to defaults
+DB_PASSWORD = os.getenv("DB_PASSWORD", "Swathi@2506")
 
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
+    'host': os.getenv("DB_HOST", "localhost"),
+    'user': os.getenv("DB_USER", "root"),
     'password': DB_PASSWORD,
-    'database': 'bitcoin_db'
+    'database': os.getenv("DB_NAME", "bitcoin_db"),
+    'port': int(os.getenv("DB_PORT", "3306"))
 }
 
 BASE_DIR = os.path.dirname(__file__)
@@ -77,7 +77,12 @@ def create_connection():
 
 def setup_database():
     """Create database and tables"""
-    config = {'host': 'localhost', 'user': 'root', 'password': DB_PASSWORD}
+    config = {
+        'host': DB_CONFIG['host'],
+        'user': DB_CONFIG['user'],
+        'password': DB_CONFIG['password'],
+        'port': DB_CONFIG['port']
+    }
 
     try:
         conn = mysql.connector.connect(**config)
