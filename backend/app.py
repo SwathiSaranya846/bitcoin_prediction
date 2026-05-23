@@ -1,5 +1,5 @@
 # backend/app.py
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from datetime import datetime
 import os
@@ -7,21 +7,14 @@ import os
 from database import setup_database, get_bitcoin_data, get_stats, save_prediction
 from model_training import train_model, load_model
 
-static_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
-app = Flask(__name__, static_folder=static_dir, static_url_path='')
+# Frontend is in ../frontend relative to backend
+frontend_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
+app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
 CORS(app)
 
 # Initialize
 print("🚀 Starting Bitcoin Prediction App...")
 setup_database()
-
-# Read HTML file
-def read_html():
-    try:
-        with open('../frontend/index.html', 'r') as f:
-            return f.read()
-    except:
-        return "<h1>Frontend not found</h1>"
 
 # Load model
 model, scaler = load_model()
@@ -32,12 +25,13 @@ if model is None:
 
 @app.route('/')
 def home():
-    """Serve frontend"""
-    # Prefer serving the static index so CSS/JS are resolved correctly.
-    try:
-        return app.send_static_file('index.html')
-    except Exception:
-        return render_template_string(read_html())
+    """Serve frontend index.html"""
+    return send_from_directory(frontend_dir, 'index.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    """Serve static files (CSS, JS, etc)"""
+    return send_from_directory(frontend_dir, filename)
 
 @app.route('/api/health')
 def health():
